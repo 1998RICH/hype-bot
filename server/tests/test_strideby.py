@@ -167,6 +167,23 @@ def test_full_flow_upload_cross_match_chat(client):
     # Decided crossings leave the feed.
     assert client.get("/crossings", headers=auth(alice)).json() == []
 
+    # Run history: Alice sees her run with the crossing counted.
+    runs = client.get("/runs", headers=auth(alice)).json()
+    assert len(runs) == 1
+    assert runs[0]["crossing_count"] == 1
+    assert runs[0]["distance_meters"] > 1500
+
+    # Run detail: route for the map + who was crossed and where.
+    detail = client.get(f"/runs/{runs[0]['id']}", headers=auth(alice)).json()
+    assert len(detail["route"]) >= 100
+    assert detail["crossings"][0]["profile"]["first_name"] == "Bob"
+    assert abs(detail["crossings"][0]["lat"] - LAT0) < 0.1
+    assert abs(detail["crossings"][0]["lon"] - LON0) < 0.1
+
+    # Bob can't read Alice's run.
+    assert client.get(f"/runs/{runs[0]['id']}",
+                      headers=auth(bob)).status_code == 404
+
 
 def test_brief_pass_creates_a_crossing(client):
     register_token = register(client, "a@example.com", "A")

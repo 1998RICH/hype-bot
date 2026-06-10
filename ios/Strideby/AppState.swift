@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 /// Single source of truth for the app.
@@ -22,6 +23,9 @@ final class AppState: ObservableObject {
     @Published var matches: [Match] = []
     /// Non-nil while the "It's a Run-In!" overlay is showing.
     @Published var newMatch: Match?
+    /// Your recorded runs, newest first.
+    @Published var runs: [RunSummary] = []
+    private var demoRunStore: [String: RunDetail] = [:]
 
     // Live-mode state
     @Published var needsAuth = false
@@ -40,6 +44,10 @@ final class AppState: ObservableObject {
         } else {
             pendingCrossings = MockData.crossings
             matches = MockData.seedMatches
+            for detail in MockData.demoRunDetails {
+                demoRunStore[detail.summary.id] = detail
+                runs.append(detail.summary)
+            }
         }
     }
 
@@ -187,6 +195,71 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - Run recording & history
+
+    @MainActor
+    func loadRuns() async {
+        guard let api, api.token != nil else { return }
+        if let dtos = try? await api.runs() {
+            runs = dtos.map(Self.runSummary(from:))
+        }
+    }
+
+    @MainActor
+    func runDetail(for id: String) async -> RunDetail? {
+        if let api {
+            guard let intID = Int(id),
+                  let dto = try? await api.runDetail(id: intID) else { return nil }
+            return Self.runDetail(from: dto)
+        }
+        return demoRunStore[id]
+    }
+
+    /// Called when the in-app recorder finishes a run.
+    @MainActor
+    func finishRun(points: [APIClient.GPSPoint]) async {
+        guard points.count >= 10 else {
+            syncStatus = "Run too short to save — keep moving a bit longer next time."
+            return
+        }
+        if let api {
+            do {
+                let response = try await api.uploadRun(points: points)
+                syncStatus = "Run saved · \(response.newCrossings) new crossing\(response.newCrossings == 1 ? "" : "s")"
+                await loadRuns()
+                await refresh()
+            } catch {
+                syncStatus = "Couldn't save the run: \(error.localizedDescription)"
+            }
+        } else {
+            let coordinates = points.map {
+                CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+            }
+            let summary = RunSummary(
+                id: UUID().uuidString,
+                date: Date(timeIntervalSince1970: points.first?.t ?? Date.now.timeIntervalSince1970),
+                distanceMeters: Self.trackDistance(points),
+                durationSeconds: (points.last?.t ?? 0) - (points.first?.t ?? 0),
+                crossingCount: 0
+            )
+            demoRunStore[summary.id] = RunDetail(summary: summary,
+                                                 coordinates: coordinates,
+                                                 crossed: [])
+            runs.insert(summary, at: 0)
+            syncStatus = "Run saved. (Demo mode — connect a server to find real crossings.)"
+        }
+    }
+
+    private static func trackDistance(_ points: [APIClient.GPSPoint]) -> Double {
+        guard points.count > 1 else { return 0 }
+        var total = 0.0
+        for (a, b) in zip(points, points.dropFirst()) {
+            total += CLLocation(latitude: a.lat, longitude: a.lon)
+                .distance(from: CLLocation(latitude: b.lat, longitude: b.lon))
+        }
+        return total
+    }
+
     func updatePrivacy(ghostMode: Bool? = nil, hideHomeZone: Bool? = nil) {
         guard let api else { return }
         Task {
@@ -299,6 +372,44 @@ final class AppState: ObservableObject {
             sender: dto.sender == "me" ? .me : .them,
             text: dto.text,
             date: Date(timeIntervalSince1970: dto.sentAt)
+        )
+    }
+
+    static func runSummary(from dto: APIClient.RunSummaryDTO) -> RunSummary {
+        RunSummary(
+            id: String(dto.id),
+            date: Date(timeIntervalSince1970: dto.startedAt),
+            distanceMeters: dto.distanceMeters,
+            durationSeconds: dto.durationSeconds,
+            crossingCount: dto.crossingCount
+        )
+    }
+
+    static func runDetail(from dto: APIClient.RunDetailDTO) -> RunDetail {
+        RunDetail(
+            summary: RunSummary(
+                id: String(dto.id),
+                date: Date(timeIntervalSince1970: dto.startedAt),
+                distanceMeters: dto.distanceMeters,
+                durationSeconds: dto.durationSeconds,
+                crossingCount: dto.crossings.count
+            ),
+            coordinates: dto.route.compactMap { pair in
+                pair.count == 2
+                    ? CLLocationCoordinate2D(latitude: pair[0], longitude: pair[1])
+                    : nil
+            },
+            crossed: dto.crossings.enumerated().map { index, crossed in
+                CrossedRunner(
+                    id: "\(dto.id)-\(index)",
+                    profile: profile(from: crossed.profile),
+                    coordinate: (crossed.lat != nil && crossed.lon != nil)
+                        ? CLLocationCoordinate2D(latitude: crossed.lat!,
+                                                 longitude: crossed.lon!)
+                        : nil,
+                    overlapMinutes: crossed.overlapMinutes
+                )
+            }
         )
     }
 }

@@ -10,9 +10,22 @@
 		BEEFCAFE0000000000000005 /* Strideby.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Strideby.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BEEFCAFE0000000000000010 /* Exceptions for "Strideby" folder in "Strideby" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BEEFCAFE0000000000000006 /* Strideby */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BEEFCAFE0000000000000001 /* Strideby */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BEEFCAFE0000000000000010 /* Exceptions for "Strideby" folder in "Strideby" target */,
+			);
 			explicitFileTypes = {
 			};
 			explicitFolders = (
@@ -256,6 +269,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Strideby/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Strideby reads your running workouts and routes to find other runners you crossed paths with. Your exact route is never shown to anyone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -282,6 +296,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Strideby/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Strideby reads your running workouts and routes to find other runners you crossed paths with. Your exact route is never shown to anyone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

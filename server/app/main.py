@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from . import detection
@@ -283,11 +283,72 @@ def detect_crossings(run: Run, me: User, db: Session) -> int:
             user_a_id=me.id, user_b_id=candidate.user_id,
             overlap_seconds=stats.overlap_seconds,
             closest_meters=stats.closest_meters,
+            closest_lat=stats.closest_lat,
+            closest_lon=stats.closest_lon,
             occurred_at=from_epoch(stats.occurred_at_epoch),
         ))
         created += 1
     db.commit()
     return created
+
+
+# --- run history ------------------------------------------------------------
+
+def run_summary_payload(run: Run, db: Session) -> dict:
+    crossing_count = db.scalar(
+        select(func.count()).select_from(Crossing).where(
+            or_(Crossing.run_a_id == run.id, Crossing.run_b_id == run.id))
+    )
+    return {
+        "id": run.id,
+        "started_at": epoch(run.started_at),
+        "distance_meters": run.distance_meters,
+        "duration_seconds": (run.ended_at - run.started_at).total_seconds(),
+        "crossing_count": int(crossing_count or 0),
+    }
+
+
+@app.get("/runs")
+def list_runs(me: User = Depends(get_current_user),
+              db: Session = Depends(get_db)):
+    runs = db.scalars(
+        select(Run).where(Run.user_id == me.id)
+        .order_by(Run.started_at.desc())
+    ).all()
+    return [run_summary_payload(r, db) for r in runs]
+
+
+@app.get("/runs/{run_id}")
+def run_detail(run_id: int, me: User = Depends(get_current_user),
+               db: Session = Depends(get_db)):
+    run = db.get(Run, run_id)
+    if run is None or run.user_id != me.id:
+        raise HTTPException(404, "Run not found")
+
+    # Downsample the route so the map payload stays small.
+    stride = max(1, len(run.samples) // 500)
+    route = [[s[0], s[1]] for s in run.samples[::stride]]
+
+    crossings = db.scalars(select(Crossing).where(
+        or_(Crossing.run_a_id == run.id, Crossing.run_b_id == run.id)
+    )).all()
+    crossed = []
+    for crossing in crossings:
+        other_id = (crossing.user_b_id if crossing.user_a_id == me.id
+                    else crossing.user_a_id)
+        other = db.get(User, other_id)
+        crossed.append({
+            "profile": public_profile(other),
+            "lat": crossing.closest_lat,
+            "lon": crossing.closest_lon,
+            "overlap_minutes": max(1, round(crossing.overlap_seconds / 60)),
+            "occurred_at": epoch(crossing.occurred_at),
+        })
+
+    payload = run_summary_payload(run, db)
+    payload["route"] = route
+    payload["crossings"] = crossed
+    return payload
 
 
 # --- crossings feed ---------------------------------------------------------

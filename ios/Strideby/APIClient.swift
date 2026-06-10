@@ -88,6 +88,30 @@ final class APIClient {
         let newCrossings: Int
     }
 
+    struct RunSummaryDTO: Decodable {
+        let id: Int
+        let startedAt: Double
+        let distanceMeters: Double
+        let durationSeconds: Double
+        let crossingCount: Int
+    }
+
+    struct RunCrossedDTO: Decodable {
+        let profile: ProfileDTO
+        let lat: Double?
+        let lon: Double?
+        let overlapMinutes: Int
+    }
+
+    struct RunDetailDTO: Decodable {
+        let id: Int
+        let startedAt: Double
+        let distanceMeters: Double
+        let durationSeconds: Double
+        let route: [[Double]]
+        let crossings: [RunCrossedDTO]
+    }
+
     struct GPSPoint: Encodable {
         let lat: Double
         let lon: Double
@@ -146,6 +170,14 @@ final class APIClient {
         struct RunUpload: Encodable { let samples: [GPSPoint] }
         let body = try JSONEncoder().encode(RunUpload(samples: points))
         return try await request("POST", "runs", bodyData: body)
+    }
+
+    func runs() async throws -> [RunSummaryDTO] {
+        try await request("GET", "runs")
+    }
+
+    func runDetail(id: Int) async throws -> RunDetailDTO {
+        try await request("GET", "runs/\(id)")
     }
 
     func updatePrivacy(ghostMode: Bool?, hideHomeZone: Bool?) async throws {

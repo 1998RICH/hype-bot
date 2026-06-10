@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 /// Seed data so the prototype is fully explorable without a backend.
@@ -117,6 +118,43 @@ enum MockData {
                 ],
                 matchedAt: hoursAgo(30)
             )
+        ]
+    }
+
+    /// A smooth park-loop route for the demo run map.
+    static func demoLoop(points: Int = 240) -> [CLLocationCoordinate2D] {
+        (0..<points).map { index in
+            let theta = 2 * Double.pi * Double(index) / Double(points)
+            return CLLocationCoordinate2D(
+                latitude: 40.7855 + 0.0042 * sin(theta),
+                longitude: -73.9655 + 0.0061 * cos(theta)
+            )
+        }
+    }
+
+    static var demoRunDetails: [RunDetail] {
+        let route = demoLoop()
+        let feed = crossings
+        return [
+            RunDetail(
+                summary: RunSummary(id: "demo-run-1", date: hoursAgo(20),
+                                    distanceMeters: 5230, durationSeconds: 1684,
+                                    crossingCount: 2),
+                coordinates: route,
+                crossed: [
+                    CrossedRunner(id: "demo-crossed-1", profile: feed[0].profile,
+                                  coordinate: route[40], overlapMinutes: 4),
+                    CrossedRunner(id: "demo-crossed-2", profile: feed[3].profile,
+                                  coordinate: route[150], overlapMinutes: 11),
+                ]
+            ),
+            RunDetail(
+                summary: RunSummary(id: "demo-run-2", date: hoursAgo(68),
+                                    distanceMeters: 8140, durationSeconds: 2745,
+                                    crossingCount: 0),
+                coordinates: route,
+                crossed: []
+            ),
         ]
     }
 

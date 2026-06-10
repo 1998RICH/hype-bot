@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 struct RunnerProfile: Identifiable {
@@ -45,4 +46,45 @@ struct Match: Identifiable {
     var crossing: Crossing
     var messages: [ChatMessage]
     var matchedAt: Date
+}
+
+/// One of your own recorded runs, as shown in the Run tab list.
+struct RunSummary: Identifiable {
+    let id: String
+    var date: Date
+    var distanceMeters: Double
+    var durationSeconds: Double
+    var crossingCount: Int
+
+    var distanceText: String {
+        String(format: "%.1f km", distanceMeters / 1000)
+    }
+
+    var durationText: String {
+        let total = Int(durationSeconds)
+        if total >= 3600 {
+            return String(format: "%d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
+        }
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    var paceText: String {
+        guard distanceMeters > 50, durationSeconds > 0 else { return "–" }
+        let secondsPerKm = durationSeconds / (distanceMeters / 1000)
+        return String(format: "%d:%02d /km", Int(secondsPerKm) / 60, Int(secondsPerKm) % 60)
+    }
+}
+
+/// A runner you crossed on a specific run, with where it happened.
+struct CrossedRunner: Identifiable {
+    let id: String
+    var profile: RunnerProfile
+    var coordinate: CLLocationCoordinate2D?
+    var overlapMinutes: Int
+}
+
+struct RunDetail {
+    var summary: RunSummary
+    var coordinates: [CLLocationCoordinate2D]
+    var crossed: [CrossedRunner]
 }

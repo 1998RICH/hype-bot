@@ -24,6 +24,8 @@ class OverlapStats:
     overlap_seconds: float
     closest_meters: float
     occurred_at_epoch: float  # moment of the closest pass
+    closest_lat: float = 0.0  # where the closest pass happened
+    closest_lon: float = 0.0
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -73,6 +75,8 @@ def overlap_stats(a: list[Sample], b: list[Sample],
         overlap_seconds=min(forward.overlap_seconds, backward.overlap_seconds),
         closest_meters=min(forward.closest_meters, backward.closest_meters),
         occurred_at_epoch=forward.occurred_at_epoch,
+        closest_lat=forward.closest_lat,
+        closest_lon=forward.closest_lon,
     )
 
 
@@ -87,6 +91,8 @@ def _directed_stats(a: list[Sample], b: list[Sample],
     overlap = 0.0
     closest = math.inf
     occurred_at = a[0][2] if a else 0.0
+    closest_lat = a[0][0] if a else 0.0
+    closest_lon = a[0][1] if a else 0.0
     j = 0
     for lat, lon, t in a:
         while j + 1 < len(b) and abs(b[j + 1][2] - t) < abs(b[j][2] - t):
@@ -98,9 +104,11 @@ def _directed_stats(a: list[Sample], b: list[Sample],
         if d < closest:
             closest = d
             occurred_at = t
+            closest_lat = lat
+            closest_lon = lon
         if d <= radius_m:
             overlap += 1.0
-    return OverlapStats(overlap, closest, occurred_at)
+    return OverlapStats(overlap, closest, occurred_at, closest_lat, closest_lon)
 
 
 def pace_str(distance_m: float, duration_s: float) -> str:

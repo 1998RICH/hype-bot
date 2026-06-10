@@ -76,6 +76,9 @@ class Crossing(Base):
     user_b_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     overlap_seconds: Mapped[float] = mapped_column(Float)
     closest_meters: Mapped[float] = mapped_column(Float)
+    # Where the closest pass happened — shown on the run-detail map.
+    closest_lat: Mapped[float] = mapped_column(Float, default=0.0)
+    closest_lon: Mapped[float] = mapped_column(Float, default=0.0)
     occurred_at: Mapped[datetime] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
