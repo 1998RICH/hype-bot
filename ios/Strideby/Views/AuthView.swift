@@ -15,10 +15,10 @@ struct AuthView: View {
             Spacer()
             ZStack {
                 Circle()
-                    .fill(Theme.glow(Theme.orange, radius: 120))
+                    .fill(Theme.glow(Theme.violet, radius: 120))
                     .frame(width: 240, height: 240)
                 Circle()
-                    .fill(Theme.brandGradient)
+                    .fill(Theme.purpleGradient)
                     .frame(width: 80, height: 80)
                 Image(systemName: "figure.run")
                     .font(.system(size: 36, weight: .bold))

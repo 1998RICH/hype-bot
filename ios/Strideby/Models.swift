@@ -31,6 +31,8 @@ struct Crossing: Identifiable {
     var overlapMinutes: Int
     var closestDistanceMeters: Int
     var theirPace: String
+    /// Where the closest pass happened — the card's map hero.
+    var coordinate: CLLocationCoordinate2D? = nil
 }
 
 struct ChatMessage: Identifiable {

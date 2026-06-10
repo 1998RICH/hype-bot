@@ -56,6 +56,8 @@ final class APIClient {
         let occurredAt: Double
         let overlapMinutes: Int
         let closestMeters: Int
+        let lat: Double?
+        let lon: Double?
         let theirPace: String
         let routeName: String
         let profile: ProfileDTO

@@ -55,7 +55,7 @@ enum Theme {
 
     static var bg: Color {
         switch variant {
-        case .neonNight: return Color(hex: 0x100B1C)
+        case .neonNight: return Color(hex: 0x141021)
         case .voltMinimal: return Color(hex: 0x0D0D10)
         case .sunsetClub: return Color(hex: 0x0A0A0A)
         }
@@ -63,7 +63,7 @@ enum Theme {
 
     static var card: Color {
         switch variant {
-        case .neonNight: return Color(hex: 0x1E152E)
+        case .neonNight: return Color(hex: 0x211A35)
         case .voltMinimal: return Color(hex: 0x1A1A20)
         case .sunsetClub: return Color(hex: 0x171614)
         }
@@ -71,7 +71,7 @@ enum Theme {
 
     static var cardElevated: Color {
         switch variant {
-        case .neonNight: return Color(hex: 0x2B1F41)
+        case .neonNight: return Color(hex: 0x2D2349)
         case .voltMinimal: return Color(hex: 0x24242C)
         case .sunsetClub: return Color(hex: 0x21201D)
         }
@@ -83,9 +83,12 @@ enum Theme {
 
     // MARK: Accent system
 
+    /// Volt lime — the loud CTA color of the reference model.
+    static let lime = Color(hex: 0xC8F549)
+
     static var accent: Color {
         switch variant {
-        case .neonNight: return orange
+        case .neonNight: return lime
         case .voltMinimal: return voltYellow
         case .sunsetClub: return amber
         }
@@ -93,31 +96,29 @@ enum Theme {
 
     static var onAccent: Color {
         switch variant {
-        case .neonNight: return .white
+        case .neonNight: return Color(hex: 0x1B2404)
         case .voltMinimal: return Color(hex: 0x201602)
         case .sunsetClub: return Color(hex: 0x211200)
         }
     }
 
-    /// Primary buttons: a hot gradient in Neon Night, solid accent elsewhere.
-    static var primaryFill: AnyShapeStyle {
-        switch variant {
-        case .neonNight:
-            return AnyShapeStyle(LinearGradient(
-                colors: [orange, Color(hex: 0xB44CFF)],
-                startPoint: .topLeading, endPoint: .bottomTrailing))
-        case .voltMinimal, .sunsetClub:
-            return AnyShapeStyle(accent)
-        }
+    /// Secondary actions & the floating run button (reference: purple).
+    static var purpleGradient: LinearGradient {
+        LinearGradient(colors: [Color(hex: 0x9D6BFF), Color(hex: 0x6D28D9)],
+                       startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
-    /// Border treatment for hero cards (the swipe deck).
+    static var primaryFill: AnyShapeStyle {
+        AnyShapeStyle(accent)
+    }
+
+    /// Neon edge for hero cards — lime fading into purple, like the model.
     static var heroBorder: AnyShapeStyle {
         switch variant {
         case .neonNight:
             return AnyShapeStyle(LinearGradient(
-                colors: [voltYellow.opacity(0.9), orange.opacity(0.55), violet.opacity(0.9)],
-                startPoint: .topLeading, endPoint: .bottomTrailing))
+                colors: [lime.opacity(0.95), lime.opacity(0.2), violet.opacity(0.95)],
+                startPoint: .top, endPoint: .bottom))
         case .voltMinimal, .sunsetClub:
             return AnyShapeStyle(cardBorder)
         }
@@ -137,7 +138,7 @@ enum Theme {
 
     static var slate: Color {
         switch variant {
-        case .neonNight: return Color(hex: 0xB1A5C7)
+        case .neonNight: return Color(hex: 0xB7AECE)
         case .voltMinimal: return Color(hex: 0xA3A3AE)
         case .sunsetClub: return Color(hex: 0xA9A29A)
         }

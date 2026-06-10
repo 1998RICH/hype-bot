@@ -35,8 +35,12 @@ final class AppState: ObservableObject {
     /// Hidden while a detail screen (chat, run detail) is open.
     @Published var hideTabBar = false
 
+    /// Lets child screens ask the tab bar to switch (e.g. the chat icon on
+    /// the home header).
+    @Published var requestedTab: MainTab?
+
     /// Active design direction (Profile → Design lab).
-    @Published var design: DesignVariant = .voltMinimal {
+    @Published var design: DesignVariant = .neonNight {
         didSet {
             Theme.variant = design
             UserDefaults.standard.set(design.rawValue, forKey: Self.designKey)
@@ -361,7 +365,10 @@ final class AppState: ObservableObject {
             date: Date(timeIntervalSince1970: dto.occurredAt),
             overlapMinutes: dto.overlapMinutes,
             closestDistanceMeters: dto.closestMeters,
-            theirPace: dto.theirPace
+            theirPace: dto.theirPace,
+            coordinate: (dto.lat != nil && dto.lon != nil)
+                ? CLLocationCoordinate2D(latitude: dto.lat!, longitude: dto.lon!)
+                : nil
         )
     }
 

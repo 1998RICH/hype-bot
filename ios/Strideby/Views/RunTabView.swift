@@ -1,6 +1,8 @@
 import SwiftUI
 
-/// Record a run with the phone's GPS and browse past runs.
+/// Stats + recording — modeled on the reference's second screen: greeting,
+/// "running journey" card with progress and dual pills, matches row, and a
+/// lime line chart with day pills.
 struct RunTabView: View {
     @EnvironmentObject private var app: AppState
     @StateObject private var recorder = RunRecorder()
@@ -24,18 +26,17 @@ struct RunTabView: View {
         .task { await app.loadRuns() }
     }
 
-    // MARK: - Idle: hero, week row, start, history
+    // MARK: - Idle
 
     private var idleView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                (Text("Let's ").foregroundColor(.white)
-                 + Text("run").foregroundColor(Theme.accent))
-                    .font(.system(size: 30, weight: .black, design: .rounded))
-                    .padding(.top, 8)
-                hero
-                weekRow
-                startCard
+                greeting
+                journeyCard
+                if !app.matches.isEmpty {
+                    matchesRow
+                }
+                chartCard
                 if let status = app.syncStatus {
                     Text(status)
                         .font(.caption)
@@ -46,130 +47,190 @@ struct RunTabView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .padding(.top, 8)
         }
         .scrollIndicators(.hidden)
     }
 
-    private var weeklyKm: Double {
-        let cutoff = Date.now.addingTimeInterval(-7 * 86_400)
-        return app.runs
-            .filter { $0.date > cutoff }
+    private var greeting: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Hello \(app.me.firstName)!")
+                .font(.system(size: 34, weight: .black))
+                .fontWidth(.compressed)
+                .foregroundStyle(.white)
+            (Text("Find your ").foregroundColor(Theme.slate)
+             + Text("crossings").foregroundColor(Theme.accent)
+             + Text(" here.").foregroundColor(Theme.slate))
+                .font(.subheadline)
+        }
+    }
+
+    private var todayKm: Double {
+        app.runs
+            .filter { Calendar.current.isDateInToday($0.date) }
             .reduce(0) { $0 + $1.distanceMeters } / 1000
     }
 
-    private var hero: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(String(format: "%.1f", weeklyKm))
-                .font(.system(size: 56, weight: .black, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
-            Text("km this week")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.slate)
+    private var journeyCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Today's running journey")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text("Track goals. Cross paths. Keep moving.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.slate)
+                }
+                Spacer()
+                VStack(spacing: 1) {
+                    Text(String(format: "%.1f", todayKm))
+                        .font(.system(size: 21, weight: .black))
+                        .fontWidth(.compressed)
+                        .foregroundStyle(.white)
+                    Text("KM")
+                        .font(.system(size: 9, weight: .heavy))
+                        .kerning(1)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .frame(width: 60, height: 54)
+                .background(Theme.purpleGradient, in: RoundedRectangle(cornerRadius: 16))
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.10))
+                    Capsule()
+                        .fill(Theme.accent)
+                        .frame(width: geo.size.width * min(todayKm / 5.0, 1))
+                }
+            }
+            .frame(height: 6)
+            HStack(spacing: 10) {
+                Button {
+                    recorder.start()
+                } label: {
+                    Text("START RUNNING")
+                        .font(.system(size: 12, weight: .heavy))
+                        .kerning(1)
+                        .foregroundStyle(Theme.onAccent)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 11)
+                        .background(Theme.accent, in: Capsule())
+                }
+                Button {
+                    Task {
+                        if app.isLive { await app.uploadTestRun() }
+                        else { app.syncDemoRun() }
+                    }
+                } label: {
+                    Text(app.isLive ? "TEST RUN" : "DEMO SYNC")
+                        .font(.system(size: 12, weight: .heavy))
+                        .kerning(1)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 11)
+                        .background(Theme.purpleGradient, in: Capsule())
+                }
+            }
         }
+        .padding(16)
+        .glassCard(radius: 24)
     }
 
-    /// Last 7 days; days you ran get an accent check (reference-style).
-    private var weekRow: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<7, id: \.self) { offset in
-                let day = Calendar.current.date(byAdding: .day,
-                                                value: offset - 6,
-                                                to: .now) ?? .now
-                let ran = app.runs.contains {
-                    Calendar.current.isDate($0.date, inSameDayAs: day)
-                }
-                VStack(spacing: 6) {
-                    Text(day.formatted(.dateTime.weekday(.narrow)))
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(Theme.slate)
-                    ZStack {
-                        Circle()
-                            .fill(ran ? AnyShapeStyle(Theme.accent)
-                                      : AnyShapeStyle(Theme.card))
-                        if ran {
-                            Image(systemName: "checkmark")
-                                .font(.caption.weight(.heavy))
-                                .foregroundStyle(Theme.onAccent)
+    private var matchesRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("YOUR MATCHES")
+                .font(.system(size: 11, weight: .heavy))
+                .kerning(1.6)
+                .foregroundStyle(Theme.slate)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 14) {
+                    ForEach(app.matches) { match in
+                        Button {
+                            app.requestedTab = .matches
+                        } label: {
+                            VStack(spacing: 5) {
+                                AvatarView(profile: match.crossing.profile, size: 58)
+                                    .overlay(Circle().stroke(Theme.purpleGradient, lineWidth: 2))
+                                Text(match.crossing.profile.firstName)
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.slate)
+                            }
                         }
                     }
-                    .frame(width: 32, height: 32)
-                    .overlay(Circle().stroke(Theme.cardBorder, lineWidth: ran ? 0 : 1))
                 }
-                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
             }
         }
-        .padding(12)
-        .glassCard(radius: 20)
     }
 
-    private var startCard: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "figure.run")
-                .font(.system(size: 36, weight: .bold))
-                .foregroundStyle(startForeground)
-            Text("Ready to cross paths?")
-                .font(.title3.bold())
-                .foregroundStyle(startForeground)
-            Text("Strideby records your route while you run — your phone in a pocket is all you need.")
-                .font(.subheadline)
-                .foregroundStyle(startForeground.opacity(0.75))
-                .multilineTextAlignment(.center)
-            Button {
-                recorder.start()
-            } label: {
-                Text("Start running")
+    // MARK: - Chart
+
+    private var dailyKm: [Double] {
+        (0..<7).map { offset in
+            let day = Calendar.current.date(byAdding: .day, value: offset - 6,
+                                            to: .now) ?? .now
+            return app.runs
+                .filter { Calendar.current.isDate($0.date, inSameDayAs: day) }
+                .reduce(0) { $0 + $1.distanceMeters } / 1000
+        }
+    }
+
+    private var weekDeltaPercent: Int? {
+        let cutoff = Date.now.addingTimeInterval(-7 * 86_400)
+        let previousCutoff = Date.now.addingTimeInterval(-14 * 86_400)
+        let thisWeek = app.runs.filter { $0.date > cutoff }
+            .reduce(0) { $0 + $1.distanceMeters }
+        let lastWeek = app.runs.filter { $0.date > previousCutoff && $0.date <= cutoff }
+            .reduce(0) { $0 + $1.distanceMeters }
+        guard lastWeek > 100 else { return nil }
+        return Int(((thisWeek - lastWeek) / lastWeek) * 100)
+    }
+
+    private var chartCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Last 7 days")
                     .font(.headline)
-                    .foregroundStyle(startButtonForeground)
-                    .padding(.vertical, 14)
-                    .frame(maxWidth: .infinity)
-                    .background(startButtonBackground, in: RoundedRectangle(cornerRadius: 16))
+                    .foregroundStyle(.white)
+                Spacer()
+                if let delta = weekDeltaPercent {
+                    HStack(spacing: 4) {
+                        Image(systemName: delta >= 0 ? "arrow.up.right" : "arrow.down.right")
+                        Text("\(abs(delta))%")
+                    }
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(delta >= 0 ? Theme.accent : .red)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.white.opacity(0.07), in: Capsule())
+                }
+            }
+            WeeklyChart(values: dailyKm)
+                .frame(height: 100)
+            HStack(spacing: 6) {
+                ForEach(0..<7, id: \.self) { offset in
+                    let day = Calendar.current.date(byAdding: .day,
+                                                    value: offset - 6,
+                                                    to: .now) ?? .now
+                    Text(day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Theme.slate)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .background(.white.opacity(0.05), in: Capsule())
+                }
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity)
-        .background(startBackground, in: RoundedRectangle(cornerRadius: 26))
-        .overlay(RoundedRectangle(cornerRadius: 26)
-            .stroke(Theme.variant == .voltMinimal ? Theme.cardBorder : .clear, lineWidth: 1))
-    }
-
-    // Start card flavor per design direction: gradient hero (Neon Night),
-    // quiet card (Volt Minimal), or a bold accent block (Sunset Club).
-    private var startBackground: AnyShapeStyle {
-        switch Theme.variant {
-        case .neonNight: return Theme.primaryFill
-        case .voltMinimal: return AnyShapeStyle(Theme.card)
-        case .sunsetClub: return AnyShapeStyle(Theme.accent)
-        }
-    }
-
-    private var startForeground: Color {
-        switch Theme.variant {
-        case .neonNight: return .white
-        case .voltMinimal: return .white
-        case .sunsetClub: return Theme.onAccent
-        }
-    }
-
-    private var startButtonBackground: AnyShapeStyle {
-        switch Theme.variant {
-        case .neonNight: return AnyShapeStyle(Color.white)
-        case .voltMinimal: return AnyShapeStyle(Theme.accent)
-        case .sunsetClub: return AnyShapeStyle(Theme.bg)
-        }
-    }
-
-    private var startButtonForeground: Color {
-        switch Theme.variant {
-        case .neonNight: return Theme.orange
-        case .voltMinimal: return Theme.onAccent
-        case .sunsetClub: return .white
-        }
+        .padding(16)
+        .glassCard(radius: 24)
     }
 
     private var runsList: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("My runs")
-                .font(.headline)
+                .font(.system(size: 22, weight: .black))
+                .fontWidth(.compressed)
                 .foregroundStyle(.white)
             ForEach(app.runs) { run in
                 NavigationLink(value: run.id) {
@@ -196,8 +257,9 @@ struct RunTabView: View {
             }
             Spacer()
             if run.crossingCount > 0 {
-                Text("\(run.crossingCount) crossed")
-                    .font(.caption.weight(.bold))
+                Text("\(run.crossingCount) CROSSED")
+                    .font(.system(size: 10, weight: .heavy))
+                    .kerning(0.6)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(Theme.accent, in: Capsule())
@@ -216,7 +278,7 @@ struct RunTabView: View {
     private var recordingView: some View {
         ZStack {
             Circle()
-                .fill(Theme.glow(Theme.orange, radius: 260))
+                .fill(Theme.glow(Theme.violet, radius: 260))
                 .frame(width: 600, height: 600)
             VStack(spacing: 28) {
                 Spacer()
@@ -228,7 +290,8 @@ struct RunTabView: View {
                         .kerning(2)
                 }
                 Text(timeString(recorder.elapsed))
-                    .font(.system(size: 68, weight: .black, design: .rounded).monospacedDigit())
+                    .font(.system(size: 76, weight: .black).monospacedDigit())
+                    .fontWidth(.compressed)
                     .foregroundStyle(.white)
                 HStack {
                     StatBlock(value: String(format: "%.2f km", recorder.distanceMeters / 1000),

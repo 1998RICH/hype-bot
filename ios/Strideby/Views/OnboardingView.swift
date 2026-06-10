@@ -40,10 +40,10 @@ struct OnboardingView: View {
             Spacer()
             ZStack {
                 Circle()
-                    .fill(Theme.glow(Theme.orange, radius: 160))
+                    .fill(Theme.glow(Theme.violet, radius: 160))
                     .frame(width: 320, height: 320)
                 Circle()
-                    .fill(Theme.brandGradient)
+                    .fill(Theme.purpleGradient)
                     .frame(width: 116, height: 116)
                 Image(systemName: "figure.run")
                     .font(.system(size: 52, weight: .bold))

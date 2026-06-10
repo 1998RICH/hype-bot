@@ -30,7 +30,8 @@ enum MockData {
                     likesYou: true
                 ),
                 routeName: "Riverside Loop", date: hoursAgo(3),
-                overlapMinutes: 4, closestDistanceMeters: 6, theirPace: "4:55 /km"
+                overlapMinutes: 4, closestDistanceMeters: 6, theirPace: "4:55 /km",
+                coordinate: CLLocationCoordinate2D(latitude: 40.7892, longitude: -73.9610)
             ),
             Crossing(
                 id: UUID().uuidString,
@@ -43,7 +44,8 @@ enum MockData {
                     likesYou: false
                 ),
                 routeName: "Canal Path", date: hoursAgo(26),
-                overlapMinutes: 7, closestDistanceMeters: 3, theirPace: "5:30 /km"
+                overlapMinutes: 7, closestDistanceMeters: 3, theirPace: "5:30 /km",
+                coordinate: CLLocationCoordinate2D(latitude: 40.7818, longitude: -73.9701)
             ),
             Crossing(
                 id: UUID().uuidString,
@@ -56,7 +58,8 @@ enum MockData {
                     likesYou: true
                 ),
                 routeName: "Stadium Park", date: hoursAgo(50),
-                overlapMinutes: 2, closestDistanceMeters: 9, theirPace: "4:20 /km"
+                overlapMinutes: 2, closestDistanceMeters: 9, theirPace: "4:20 /km",
+                coordinate: CLLocationCoordinate2D(latitude: 40.7861, longitude: -73.9599)
             ),
             Crossing(
                 id: UUID().uuidString,
@@ -69,7 +72,8 @@ enum MockData {
                     likesYou: true
                 ),
                 routeName: "Riverside Loop", date: hoursAgo(74),
-                overlapMinutes: 11, closestDistanceMeters: 2, theirPace: "5:45 /km"
+                overlapMinutes: 11, closestDistanceMeters: 2, theirPace: "5:45 /km",
+                coordinate: CLLocationCoordinate2D(latitude: 40.7899, longitude: -73.9656)
             ),
             Crossing(
                 id: UUID().uuidString,
@@ -82,7 +86,8 @@ enum MockData {
                     likesYou: false
                 ),
                 routeName: "Harbor Front", date: hoursAgo(98),
-                overlapMinutes: 5, closestDistanceMeters: 4, theirPace: "5:05 /km"
+                overlapMinutes: 5, closestDistanceMeters: 4, theirPace: "5:05 /km",
+                coordinate: CLLocationCoordinate2D(latitude: 40.7812, longitude: -73.9648)
             )
         ]
     }
@@ -99,7 +104,8 @@ enum MockData {
         let crossing = Crossing(
             id: UUID().uuidString, profile: noa,
             routeName: "Old Town 5K", date: hoursAgo(120),
-            overlapMinutes: 9, closestDistanceMeters: 2, theirPace: "5:20 /km"
+            overlapMinutes: 9, closestDistanceMeters: 2, theirPace: "5:20 /km",
+            coordinate: CLLocationCoordinate2D(latitude: 40.7845, longitude: -73.9712)
         )
         return [
             Match(

@@ -66,6 +66,12 @@ struct MainTabView: View {
             }
         }
         .background(Theme.bg.ignoresSafeArea())
+        .onChange(of: app.requestedTab) { _, newValue in
+            if let newValue {
+                withAnimation(.snappy) { tab = newValue }
+                app.requestedTab = nil
+            }
+        }
     }
 
     @ViewBuilder
@@ -95,15 +101,16 @@ struct MainTabView: View {
                 ZStack {
                     Circle()
                         .fill(tab == .run
-                              ? AnyShapeStyle(Theme.volt)
-                              : AnyShapeStyle(Theme.brandGradient))
+                              ? AnyShapeStyle(Theme.accent)
+                              : AnyShapeStyle(Theme.purpleGradient))
                         .frame(width: 58, height: 58)
                     Image(systemName: "figure.run")
                         .font(.title3.weight(.bold))
-                        .foregroundStyle(tab == .run ? Theme.onVolt : .white)
+                        .foregroundStyle(tab == .run ? Theme.onAccent : .white)
                 }
             }
-            .shadow(color: Theme.orange.opacity(0.4), radius: 14, y: 4)
+            .shadow(color: (tab == .run ? Theme.accent : Theme.violet).opacity(0.45),
+                    radius: 14, y: 4)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 6)

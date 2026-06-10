@@ -98,6 +98,9 @@ def crossing_payload(crossing: Crossing, me: User, db: Session) -> dict:
         "occurred_at": epoch(crossing.occurred_at),
         "overlap_minutes": max(1, round(crossing.overlap_seconds / 60)),
         "closest_meters": max(1, round(crossing.closest_meters)),
+        # Where the pass happened — safe to show: it's a point on YOUR run.
+        "lat": crossing.closest_lat,
+        "lon": crossing.closest_lon,
         "their_pace": detection.pace_str(other_run.distance_meters, duration)
                       or other.pace_per_km,
         "route_name": route_name(crossing.occurred_at),

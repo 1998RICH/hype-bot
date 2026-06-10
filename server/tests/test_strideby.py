@@ -140,6 +140,7 @@ def test_full_flow_upload_cross_match_chat(client):
     assert bob_feed[0]["profile"]["first_name"] == "Alice"
     assert alice_feed[0]["overlap_minutes"] >= 1
     assert alice_feed[0]["their_pace"] != ""
+    assert abs(alice_feed[0]["lat"] - LAT0) < 0.1  # card shows the spot
 
     # Alice likes first — no match yet. Bob likes back — match!
     response = client.post(f"/crossings/{alice_feed[0]['id']}/decision",
