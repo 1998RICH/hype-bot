@@ -1,0 +1,22 @@
+# XcodeGen config — generates Strideby.xcodeproj.
+# Install: `brew install xcodegen`, then run `xcodegen generate` in this folder.
+name: Strideby
+options:
+  bundleIdPrefix: com.strideby
+targets:
+  Strideby:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: [Strideby]
+    info:
+      path: Strideby/Info.plist
+      properties:
+        CFBundleDisplayName: Strideby
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait

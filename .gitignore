@@ -1,0 +1,9 @@
+.DS_Store
+xcuserdata/
+DerivedData/
+build/
+.build/
+# The Xcode project is generated from ios/project.yml via xcodegen
+*.xcodeproj
+*.xcworkspace
+ios/Strideby/Info.plist
