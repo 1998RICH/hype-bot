@@ -26,7 +26,7 @@ This has three important consequences for the product:
 
 **1. A real backend** (`server/`) — accounts, run upload, GPS crossing detection, matching, and chat, with a full test suite. Deployable to a free Render instance in ~10 minutes; see [server/README.md](server/README.md).
 
-**2. The iOS app** (`ios/`) — every screen of the core loop, in the Strava × Bumble design language you described (Strava orange `#FC5200` + Bumble yellow `#FFC629`):
+**2. The iOS app** (`ios/`) — every screen of the core loop, in a dark "night runner" design language with **three switchable design directions** (Profile → Design lab): *Neon Night* (gradients & violet haze), *Volt Minimal* (clean black & electric yellow), and *Sunset Club* (bold amber blocks). All three carry the warm orange/yellow brand:
 
 | Screen | What it does |
 |---|---|

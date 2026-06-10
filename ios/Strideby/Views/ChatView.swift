@@ -17,10 +17,13 @@ struct ChatView: View {
                 inputBar
             }
         }
-        .background(Theme.cloud)
+        .background(Theme.bg.ignoresSafeArea())
         .navigationTitle(match?.crossing.profile.firstName ?? "Chat")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Theme.bg, for: .navigationBar)
         .task { await app.loadMessages(for: matchID) }
+        .onAppear { app.hideTabBar = true }
+        .onDisappear { app.hideTabBar = false }
     }
 
     private func messageList(_ match: Match) -> some View {
@@ -45,7 +48,7 @@ struct ChatView: View {
         .foregroundStyle(Theme.slate)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Theme.yellow.opacity(0.2), in: Capsule())
+        .glassCard(radius: 14)
         .padding(.bottom, 8)
     }
 
@@ -58,11 +61,11 @@ struct ChatView: View {
                 .padding(.vertical, 10)
                 .background(
                     message.sender == .me
-                        ? AnyShapeStyle(Theme.brandGradient)
-                        : AnyShapeStyle(Color.white),
+                        ? Theme.primaryFill
+                        : AnyShapeStyle(Theme.cardElevated),
                     in: RoundedRectangle(cornerRadius: 18)
                 )
-                .foregroundStyle(message.sender == .me ? Color.white : Theme.ink)
+                .foregroundStyle(message.sender == .me ? Theme.onAccent : Color.white)
             if message.sender == .them { Spacer(minLength: 48) }
         }
     }
@@ -76,12 +79,7 @@ struct ChatView: View {
                     Button {
                         app.send(line, in: matchID)
                     } label: {
-                        Text(line)
-                            .font(.footnote.weight(.medium))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Theme.yellow.opacity(0.3), in: Capsule())
-                            .foregroundStyle(Theme.ink)
+                        TagPill(text: line)
                     }
                 }
             }
@@ -93,19 +91,23 @@ struct ChatView: View {
     private var inputBar: some View {
         HStack(spacing: 10) {
             TextField("Message…", text: $draft)
+                .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(.white, in: Capsule())
+                .background(Theme.card, in: Capsule())
+                .overlay(Capsule().stroke(Theme.cardBorder, lineWidth: 1))
                 .onSubmit(sendDraft)
             Button(action: sendDraft) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 34))
-                    .foregroundStyle(Theme.orange)
+                Image(systemName: "arrow.up")
+                    .font(.headline)
+                    .foregroundStyle(Theme.onAccent)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.primaryFill, in: Circle())
             }
             .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty)
         }
         .padding(12)
-        .background(.bar)
+        .background(Theme.bg)
     }
 
     private func sendDraft() {

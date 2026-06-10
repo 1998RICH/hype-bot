@@ -1,8 +1,8 @@
 import MapKit
 import SwiftUI
 
-/// One run: the route on a map (Strava-style), stats, and the runners you
-/// crossed on this particular run — shown on the map where it happened.
+/// One run: the route on a dark map, stats, and the runners you crossed on
+/// this particular run — pinned where the closest pass happened.
 struct RunDetailView: View {
     let runID: String
     @EnvironmentObject private var app: AppState
@@ -20,37 +20,43 @@ struct RunDetailView: View {
                     }
                     .padding(16)
                 }
+                .scrollIndicators(.hidden)
             } else {
                 ProgressView()
+                    .tint(Theme.accent)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.cloud)
+        .background(Theme.bg.ignoresSafeArea())
         .navigationTitle(detail?.summary.date.formatted(.dateTime.day().month().year()) ?? "Run")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Theme.bg, for: .navigationBar)
         .task { detail = await app.runDetail(for: runID) }
+        .onAppear { app.hideTabBar = true }
+        .onDisappear { app.hideTabBar = false }
     }
 
     private func mapCard(_ detail: RunDetail) -> some View {
         Map(position: $camera) {
             if detail.coordinates.count >= 2 {
                 MapPolyline(coordinates: detail.coordinates)
-                    .stroke(Theme.orange,
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round,
+                    .stroke(Theme.accent,
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round,
                                                lineJoin: .round))
             }
             ForEach(detail.crossed) { runner in
                 if let coordinate = runner.coordinate {
                     Annotation(runner.profile.firstName, coordinate: coordinate) {
                         AvatarView(profile: runner.profile, size: 32)
-                            .overlay(Circle().stroke(.white, lineWidth: 2))
-                            .shadow(color: .black.opacity(0.25), radius: 3)
+                            .overlay(Circle().stroke(Theme.accent, lineWidth: 2))
+                            .shadow(color: .black.opacity(0.4), radius: 3)
                     }
                 }
             }
         }
         .frame(height: 300)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24).stroke(Theme.cardBorder, lineWidth: 1))
     }
 
     private func statsCard(_ summary: RunSummary) -> some View {
@@ -60,14 +66,14 @@ struct RunDetailView: View {
             StatBlock(value: summary.paceText, label: "Pace")
         }
         .padding(16)
-        .background(.white, in: RoundedRectangle(cornerRadius: 20))
+        .glassCard(radius: 22)
     }
 
     private func crossedCard(_ detail: RunDetail) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Crossed on this run")
+            (Text("Crossed ").foregroundColor(.white)
+             + Text("on this run").foregroundColor(Theme.accent))
                 .font(.headline)
-                .foregroundStyle(Theme.ink)
             if detail.crossed.isEmpty {
                 Text("Nobody this time — the more you run, the more paths you cross. 🏃")
                     .font(.subheadline)
@@ -76,10 +82,11 @@ struct RunDetailView: View {
                 ForEach(detail.crossed) { runner in
                     HStack(spacing: 12) {
                         AvatarView(profile: runner.profile, size: 44)
+                            .overlay(Circle().stroke(Theme.accent.opacity(0.5), lineWidth: 2))
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(runner.profile.firstName), \(runner.profile.age)")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.ink)
+                                .foregroundStyle(.white)
                             Text("\(runner.overlapMinutes) min side by side")
                                 .font(.caption)
                                 .foregroundStyle(Theme.slate)
@@ -87,13 +94,13 @@ struct RunDetailView: View {
                         Spacer()
                     }
                 }
-                Text("Like or pass on them in the Crossings tab.")
+                Text("Like or pass on them in the Crossed tab.")
                     .font(.caption)
                     .foregroundStyle(Theme.slate)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(.white, in: RoundedRectangle(cornerRadius: 20))
+        .glassCard(radius: 22)
     }
 }

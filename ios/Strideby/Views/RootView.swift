@@ -24,17 +24,113 @@ struct RootView: View {
     }
 }
 
+enum MainTab {
+    case crossings, run, matches, profile
+
+    var icon: String {
+        switch self {
+        case .crossings: return "arrow.triangle.swap"
+        case .run: return "figure.run"
+        case .matches: return "message.fill"
+        case .profile: return "person.fill"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .crossings: return "Crossed"
+        case .run: return "Run"
+        case .matches: return "Matches"
+        case .profile: return "Profile"
+        }
+    }
+}
+
+/// Custom floating pill tab bar + a circular "go run" button, in the style
+/// of the reference designs.
 struct MainTabView: View {
+    @EnvironmentObject private var app: AppState
+    @State private var tab: MainTab = .crossings
+
+    private let barTabs: [MainTab] = [.crossings, .matches, .profile]
+
     var body: some View {
-        TabView {
-            CrossingsFeedView()
-                .tabItem { Label("Crossings", systemImage: "arrow.triangle.swap") }
-            RunTabView()
-                .tabItem { Label("Run", systemImage: "figure.run") }
-            MatchesView()
-                .tabItem { Label("Matches", systemImage: "message.fill") }
-            ProfileView()
-                .tabItem { Label("Profile", systemImage: "person.fill") }
+        ZStack(alignment: .bottom) {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .safeAreaInset(edge: .bottom) {
+                    Color.clear.frame(height: app.hideTabBar ? 0 : 78)
+                }
+            if !app.hideTabBar {
+                bar
+            }
+        }
+        .background(Theme.bg.ignoresSafeArea())
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch tab {
+        case .crossings: CrossingsFeedView()
+        case .run: RunTabView()
+        case .matches: MatchesView()
+        case .profile: ProfileView()
+        }
+    }
+
+    private var bar: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 2) {
+                ForEach(barTabs, id: \.icon) { item in
+                    tabButton(item)
+                }
+            }
+            .padding(6)
+            .background(Theme.cardElevated, in: Capsule())
+            .overlay(Capsule().stroke(Theme.cardBorder, lineWidth: 1))
+
+            Button {
+                withAnimation(.snappy) { tab = .run }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(tab == .run
+                              ? AnyShapeStyle(Theme.volt)
+                              : AnyShapeStyle(Theme.brandGradient))
+                        .frame(width: 58, height: 58)
+                    Image(systemName: "figure.run")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(tab == .run ? Theme.onVolt : .white)
+                }
+            }
+            .shadow(color: Theme.orange.opacity(0.4), radius: 14, y: 4)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 6)
+    }
+
+    private func tabButton(_ item: MainTab) -> some View {
+        Button {
+            withAnimation(.snappy) { tab = item }
+        } label: {
+            if tab == item {
+                HStack(spacing: 6) {
+                    Image(systemName: item.icon)
+                        .font(.subheadline.weight(.semibold))
+                    Text(item.title)
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(Theme.onVolt)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Theme.volt, in: Capsule())
+            } else {
+                Image(systemName: item.icon)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Theme.slate)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+            }
         }
     }
 }

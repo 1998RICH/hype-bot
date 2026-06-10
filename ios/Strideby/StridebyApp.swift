@@ -8,7 +8,8 @@ struct StridebyApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(app)
-                .tint(Theme.orange)
+                .tint(Theme.volt)
+                .preferredColorScheme(.dark)
         }
     }
 }

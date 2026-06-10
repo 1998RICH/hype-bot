@@ -32,10 +32,26 @@ final class AppState: ObservableObject {
     @Published var authError: String?
     @Published var isSyncing = false
     @Published var syncStatus: String?
+    /// Hidden while a detail screen (chat, run detail) is open.
+    @Published var hideTabBar = false
+
+    /// Active design direction (Profile → Design lab).
+    @Published var design: DesignVariant = .voltMinimal {
+        didSet {
+            Theme.variant = design
+            UserDefaults.standard.set(design.rawValue, forKey: Self.designKey)
+        }
+    }
 
     private static let lastSyncKey = "strideby.lastHealthKitSync"
+    private static let designKey = "strideby.design"
 
     init() {
+        if let raw = UserDefaults.standard.string(forKey: Self.designKey),
+           let saved = DesignVariant(rawValue: raw) {
+            design = saved
+        }
+        Theme.variant = design
         if let api {
             if api.token != nil {
                 hasOnboarded = true

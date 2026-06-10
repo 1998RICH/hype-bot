@@ -6,32 +6,37 @@ struct ProfileView: View {
     @State private var hideHomeZone = true
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    headerCard
-                    statsCard
-                    devicesCard
-                    privacyCard
-                    if app.isLive {
-                        accountCard
-                    }
+        ScrollView {
+            VStack(spacing: 16) {
+                (Text("Your ").foregroundColor(.white)
+                 + Text("profile").foregroundColor(Theme.accent))
+                    .font(.system(size: 30, weight: .black, design: .rounded))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 8)
+                headerCard
+                designCard
+                statsCard
+                devicesCard
+                privacyCard
+                if app.isLive {
+                    accountCard
                 }
-                .padding(16)
             }
-            .background(Theme.cloud)
-            .navigationTitle("Profile")
+            .padding(.horizontal, 20)
         }
+        .scrollIndicators(.hidden)
+        .background(Theme.bg.ignoresSafeArea())
     }
 
     private var headerCard: some View {
         card {
             HStack(spacing: 14) {
                 AvatarView(profile: app.me, size: 84)
+                    .overlay(Circle().stroke(Theme.accent.opacity(0.6), lineWidth: 2))
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(app.me.firstName), \(app.me.age)")
                         .font(.title3.bold())
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(.white)
                     Text(app.me.bio)
                         .font(.subheadline)
                         .foregroundStyle(Theme.slate)
@@ -45,11 +50,66 @@ struct ProfileView: View {
         }
     }
 
+    private var designCard: some View {
+        card {
+            Text("Design lab")
+                .font(.headline)
+                .foregroundStyle(.white)
+            Text("Three directions, one app — pick the vibe.")
+                .font(.caption)
+                .foregroundStyle(Theme.slate)
+            ForEach(DesignVariant.allCases) { variant in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        app.design = variant
+                    }
+                } label: {
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(preview(variant))
+                            .frame(width: 28, height: 28)
+                            .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 1))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(variant.displayName)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white)
+                            Text(variant.blurb)
+                                .font(.caption)
+                                .foregroundStyle(Theme.slate)
+                        }
+                        Spacer()
+                        if app.design == variant {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                    .padding(10)
+                    .background(app.design == variant ? Theme.cardElevated : .clear,
+                                in: RoundedRectangle(cornerRadius: 14))
+                }
+            }
+        }
+    }
+
+    private func preview(_ variant: DesignVariant) -> LinearGradient {
+        switch variant {
+        case .neonNight:
+            return LinearGradient(colors: [Theme.orange, Theme.violet],
+                                  startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .voltMinimal:
+            return LinearGradient(colors: [Theme.voltYellow, Theme.voltYellow],
+                                  startPoint: .top, endPoint: .bottom)
+        case .sunsetClub:
+            return LinearGradient(colors: [Theme.amber, Theme.orange],
+                                  startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
+
     private var statsCard: some View {
         card {
             Text("This week")
                 .font(.headline)
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
             HStack {
                 StatBlock(value: "\(app.me.weeklyKm) km", label: "Distance")
                 StatBlock(value: app.me.pacePerKm, label: "Avg pace")
@@ -62,14 +122,14 @@ struct ProfileView: View {
         card {
             Text("Connected devices")
                 .font(.headline)
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
             Toggle(isOn: $app.appleWatchConnected) {
                 Label("Apple Watch", systemImage: "applewatch")
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(.white)
             }
             Toggle(isOn: $app.garminConnected) {
                 Label("Garmin", systemImage: "antenna.radiowaves.left.and.right")
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(.white)
             }
             if app.isLive {
                 Button {
@@ -77,6 +137,7 @@ struct ProfileView: View {
                 } label: {
                     Label(app.isSyncing ? "Syncing…" : "Sync Apple Watch runs",
                           systemImage: "arrow.triangle.2.circlepath")
+                        .foregroundStyle(Theme.accent)
                 }
                 .disabled(app.isSyncing)
                 if let status = app.syncStatus {
@@ -88,7 +149,7 @@ struct ProfileView: View {
                     .font(.caption)
                     .foregroundStyle(Theme.slate)
             } else {
-                Text("Prototype note: device sync is simulated. The real app reads workouts from HealthKit and the Garmin Health API.")
+                Text("Prototype note: device sync is simulated. Strideby can also record runs by itself — see the Run tab.")
                     .font(.caption)
                     .foregroundStyle(Theme.slate)
             }
@@ -99,11 +160,11 @@ struct ProfileView: View {
         card {
             Text("Privacy")
                 .font(.headline)
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
             Toggle(isOn: $ghostMode) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Ghost mode")
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(.white)
                     Text("Keep running, stop appearing in other people's crossings.")
                         .font(.caption)
                         .foregroundStyle(Theme.slate)
@@ -115,7 +176,7 @@ struct ProfileView: View {
             Toggle(isOn: $hideHomeZone) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Hide my home zone")
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(.white)
                     Text("Crossings near your usual start and end points are never used.")
                         .font(.caption)
                         .foregroundStyle(Theme.slate)
@@ -134,11 +195,12 @@ struct ProfileView: View {
         card {
             Text("Account & testing")
                 .font(.headline)
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
             Button {
                 Task { await app.uploadTestRun() }
             } label: {
                 Label("Upload a test run", systemImage: "wand.and.stars")
+                    .foregroundStyle(Theme.accent)
             }
             Text("Two testers who both upload a test run will cross each other — handy for trying the full loop before you have real runs.")
                 .font(.caption)
@@ -155,6 +217,7 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12, content: content)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
-            .background(.white, in: RoundedRectangle(cornerRadius: 20))
+            .glassCard(radius: 22)
+            .tint(Theme.accent)
     }
 }

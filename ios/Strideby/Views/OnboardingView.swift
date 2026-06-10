@@ -17,17 +17,11 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .always))
 
-            Button(action: advance) {
-                Text(page == 3 ? "Start crossing paths" : "Continue")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Theme.brandGradient, in: RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.white)
-            }
-            .padding(20)
+            VoltButton(title: page == 3 ? "Start crossing paths" : "Continue",
+                       action: advance)
+                .padding(20)
         }
-        .background(Theme.cloud)
+        .background(Theme.bg.ignoresSafeArea())
     }
 
     private func advance() {
@@ -46,18 +40,21 @@ struct OnboardingView: View {
             Spacer()
             ZStack {
                 Circle()
+                    .fill(Theme.glow(Theme.orange, radius: 160))
+                    .frame(width: 320, height: 320)
+                Circle()
                     .fill(Theme.brandGradient)
-                    .frame(width: 120, height: 120)
+                    .frame(width: 116, height: 116)
                 Image(systemName: "figure.run")
-                    .font(.system(size: 54, weight: .bold))
+                    .font(.system(size: 52, weight: .bold))
                     .foregroundStyle(.white)
             }
             Text("Strideby")
                 .font(.system(size: 44, weight: .black, design: .rounded))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
             Text("Cross paths. Match strides.")
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(Theme.orange)
+                .foregroundStyle(Theme.accent)
             Text("The dating app where your next run is also your next chance to meet someone.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.slate)
@@ -72,11 +69,11 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 28) {
             Spacer()
             Text("How it works")
-                .font(.largeTitle.bold())
-                .foregroundStyle(Theme.ink)
-            stepRow(icon: "applewatch",
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+            stepRow(icon: "iphone",
                     title: "Run like you always do",
-                    detail: "Record with your Apple Watch or Garmin. No phone juggling, nothing extra to do.")
+                    detail: "Record with Strideby, your Apple Watch, or Garmin. Phone in your pocket is enough.")
             stepRow(icon: "arrow.triangle.swap",
                     title: "We spot your crossings",
                     detail: "When your run syncs, we find other Strideby runners whose path crossed yours — same place, same time.")
@@ -93,13 +90,13 @@ struct OnboardingView: View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundStyle(Theme.orange)
-                .frame(width: 44, height: 44)
-                .background(Theme.yellow.opacity(0.25), in: RoundedRectangle(cornerRadius: 12))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 46, height: 46)
+                .background(Theme.accent.opacity(0.13), in: RoundedRectangle(cornerRadius: 14))
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(.white)
                 Text(detail)
                     .font(.subheadline)
                     .foregroundStyle(Theme.slate)
@@ -111,9 +108,9 @@ struct OnboardingView: View {
         VStack(spacing: 20) {
             Spacer()
             Text("Connect your watch")
-                .font(.largeTitle.bold())
-                .foregroundStyle(Theme.ink)
-            Text("Your runs sync automatically after each workout. Your exact route is never shown to other runners.")
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+            Text("Optional — Strideby can record runs by itself. Your exact route is never shown to other runners.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.slate)
                 .multilineTextAlignment(.center)
@@ -155,16 +152,16 @@ struct OnboardingView: View {
                 if connected {
                     Label("Connected", systemImage: "checkmark.circle.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Theme.accent)
                 } else {
                     Text("Connect")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.orange)
+                        .foregroundStyle(Theme.accent)
                 }
             }
+            .foregroundStyle(.white)
             .padding(16)
-            .background(.white, in: RoundedRectangle(cornerRadius: 16))
-            .foregroundStyle(Theme.ink)
+            .glassCard(radius: 18)
         }
         .padding(.horizontal, 28)
     }
@@ -173,18 +170,20 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 20) {
             Spacer()
             Text("About you")
-                .font(.largeTitle.bold())
-                .foregroundStyle(Theme.ink)
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
             Text("Just the basics — you can add photos and more later.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.slate)
             TextField("First name", text: $name)
                 .textFieldStyle(.plain)
+                .foregroundStyle(.white)
                 .padding(16)
-                .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                .glassCard(radius: 16)
             Stepper("Age: \(age)", value: $age, in: 18...80)
+                .foregroundStyle(.white)
                 .padding(16)
-                .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                .glassCard(radius: 16)
             Spacer()
             Spacer()
         }

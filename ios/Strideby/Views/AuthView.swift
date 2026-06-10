@@ -14,14 +14,20 @@ struct AuthView: View {
         VStack(spacing: 16) {
             Spacer()
             ZStack {
-                Circle().fill(Theme.brandGradient).frame(width: 84, height: 84)
+                Circle()
+                    .fill(Theme.glow(Theme.orange, radius: 120))
+                    .frame(width: 240, height: 240)
+                Circle()
+                    .fill(Theme.brandGradient)
+                    .frame(width: 80, height: 80)
                 Image(systemName: "figure.run")
-                    .font(.system(size: 38, weight: .bold))
+                    .font(.system(size: 36, weight: .bold))
                     .foregroundStyle(.white)
             }
+            .frame(height: 130)
             Text("Strideby")
                 .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(.white)
 
             Picker("Mode", selection: $isRegistering) {
                 Text("Sign up").tag(true)
@@ -42,8 +48,9 @@ struct AuthView: View {
             if isRegistering {
                 field { TextField("First name", text: $firstName) }
                 Stepper("Age: \(age)", value: $age, in: 18...80)
+                    .foregroundStyle(.white)
                     .padding(14)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                    .glassCard(radius: 16)
             }
 
             if let error = app.authError {
@@ -53,22 +60,16 @@ struct AuthView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Button(action: submit) {
-                Text(busy ? "One moment…"
-                          : (isRegistering ? "Create account" : "Log in"))
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Theme.brandGradient,
-                                in: RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.white)
-            }
-            .disabled(!canSubmit)
-            .opacity(canSubmit ? 1 : 0.6)
+            VoltButton(title: busy ? "One moment…"
+                              : (isRegistering ? "Create account" : "Log in"),
+                       action: submit)
+                .disabled(!canSubmit)
+                .opacity(canSubmit ? 1 : 0.55)
             Spacer()
         }
         .padding(24)
-        .background(Theme.cloud)
+        .background(Theme.bg.ignoresSafeArea())
+        .preferredColorScheme(.dark)
     }
 
     private var canSubmit: Bool {
@@ -90,7 +91,8 @@ struct AuthView: View {
 
     private func field<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content()
+            .foregroundStyle(.white)
             .padding(14)
-            .background(.white, in: RoundedRectangle(cornerRadius: 14))
+            .glassCard(radius: 16)
     }
 }
