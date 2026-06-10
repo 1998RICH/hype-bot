@@ -13,6 +13,9 @@ struct ProfileView: View {
                     statsCard
                     devicesCard
                     privacyCard
+                    if app.isLive {
+                        accountCard
+                    }
                 }
                 .padding(16)
             }
@@ -68,9 +71,27 @@ struct ProfileView: View {
                 Label("Garmin", systemImage: "antenna.radiowaves.left.and.right")
                     .foregroundStyle(Theme.ink)
             }
-            Text("Prototype note: device sync is simulated. The real app reads workouts from HealthKit and the Garmin Health API.")
-                .font(.caption)
-                .foregroundStyle(Theme.slate)
+            if app.isLive {
+                Button {
+                    Task { await app.syncFromHealthKit() }
+                } label: {
+                    Label(app.isSyncing ? "Syncing…" : "Sync Apple Watch runs",
+                          systemImage: "arrow.triangle.2.circlepath")
+                }
+                .disabled(app.isSyncing)
+                if let status = app.syncStatus {
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(Theme.slate)
+                }
+                Text("Garmin sync is coming next (via Terra).")
+                    .font(.caption)
+                    .foregroundStyle(Theme.slate)
+            } else {
+                Text("Prototype note: device sync is simulated. The real app reads workouts from HealthKit and the Garmin Health API.")
+                    .font(.caption)
+                    .foregroundStyle(Theme.slate)
+            }
         }
     }
 
@@ -88,6 +109,9 @@ struct ProfileView: View {
                         .foregroundStyle(Theme.slate)
                 }
             }
+            .onChange(of: ghostMode) { _, newValue in
+                app.updatePrivacy(ghostMode: newValue)
+            }
             Toggle(isOn: $hideHomeZone) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Hide my home zone")
@@ -97,9 +121,33 @@ struct ProfileView: View {
                         .foregroundStyle(Theme.slate)
                 }
             }
+            .onChange(of: hideHomeZone) { _, newValue in
+                app.updatePrivacy(hideHomeZone: newValue)
+            }
             Text("Your exact route and live location are never shown to other runners.")
                 .font(.caption)
                 .foregroundStyle(Theme.slate)
+        }
+    }
+
+    private var accountCard: some View {
+        card {
+            Text("Account & testing")
+                .font(.headline)
+                .foregroundStyle(Theme.ink)
+            Button {
+                Task { await app.uploadTestRun() }
+            } label: {
+                Label("Upload a test run", systemImage: "wand.and.stars")
+            }
+            Text("Two testers who both upload a test run will cross each other — handy for trying the full loop before you have real runs.")
+                .font(.caption)
+                .foregroundStyle(Theme.slate)
+            Button(role: .destructive) {
+                app.signOut()
+            } label: {
+                Label("Log out", systemImage: "rectangle.portrait.and.arrow.right")
+            }
         }
     }
 

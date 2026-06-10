@@ -7,3 +7,9 @@ build/
 *.xcodeproj
 *.xcworkspace
 ios/Strideby/Info.plist
+ios/Strideby/Strideby.entitlements
+# Server
+server/.venv/
+__pycache__/
+*.pyc
+*.db

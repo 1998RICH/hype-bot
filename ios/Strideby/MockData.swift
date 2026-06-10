@@ -3,7 +3,7 @@ import SwiftUI
 /// Seed data so the prototype is fully explorable without a backend.
 enum MockData {
     static var me = RunnerProfile(
-        id: UUID(),
+        id: UUID().uuidString,
         firstName: "You",
         age: 28,
         bio: "Chasing a sub-20 5K and good coffee.",
@@ -19,9 +19,9 @@ enum MockData {
     static var crossings: [Crossing] {
         [
             Crossing(
-                id: UUID(),
+                id: UUID().uuidString,
                 profile: RunnerProfile(
-                    id: UUID(), firstName: "Lena", age: 27,
+                    id: UUID().uuidString, firstName: "Lena", age: 27,
                     bio: "Half-marathon addict. I negative-split everything, including brunch.",
                     pacePerKm: "4:55 /km", weeklyKm: 45, favoriteDistance: "Half marathon",
                     tags: ["Sunrise runs", "Playlist curator", "Dog mom"],
@@ -32,9 +32,9 @@ enum MockData {
                 overlapMinutes: 4, closestDistanceMeters: 6, theirPace: "4:55 /km"
             ),
             Crossing(
-                id: UUID(),
+                id: UUID().uuidString,
                 profile: RunnerProfile(
-                    id: UUID(), firstName: "Marco", age: 31,
+                    id: UUID().uuidString, firstName: "Marco", age: 31,
                     bio: "Trail runner pretending to like road races. Post-run pizza is non-negotiable.",
                     pacePerKm: "5:30 /km", weeklyKm: 38, favoriteDistance: "Trail 20K",
                     tags: ["Trails", "Pizza", "Strava addict"],
@@ -45,9 +45,9 @@ enum MockData {
                 overlapMinutes: 7, closestDistanceMeters: 3, theirPace: "5:30 /km"
             ),
             Crossing(
-                id: UUID(),
+                id: UUID().uuidString,
                 profile: RunnerProfile(
-                    id: UUID(), firstName: "Aki", age: 26,
+                    id: UUID().uuidString, firstName: "Aki", age: 26,
                     bio: "Track nights on Tuesdays. Will judge your warm-up routine (lovingly).",
                     pacePerKm: "4:20 /km", weeklyKm: 55, favoriteDistance: "5K",
                     tags: ["Track nights", "Ramen", "Cat person"],
@@ -58,9 +58,9 @@ enum MockData {
                 overlapMinutes: 2, closestDistanceMeters: 9, theirPace: "4:20 /km"
             ),
             Crossing(
-                id: UUID(),
+                id: UUID().uuidString,
                 profile: RunnerProfile(
-                    id: UUID(), firstName: "June", age: 29,
+                    id: UUID().uuidString, firstName: "June", age: 29,
                     bio: "Marathon #4 in October. Looking for someone to share long-run snacks with.",
                     pacePerKm: "5:45 /km", weeklyKm: 60, favoriteDistance: "Marathon",
                     tags: ["Long runs", "Gels & gummies", "Bookworm"],
@@ -71,9 +71,9 @@ enum MockData {
                 overlapMinutes: 11, closestDistanceMeters: 2, theirPace: "5:45 /km"
             ),
             Crossing(
-                id: UUID(),
+                id: UUID().uuidString,
                 profile: RunnerProfile(
-                    id: UUID(), firstName: "Sam", age: 33,
+                    id: UUID().uuidString, firstName: "Sam", age: 33,
                     bio: "Recovering cyclist. My watch has more PRs than my legs.",
                     pacePerKm: "5:05 /km", weeklyKm: 28, favoriteDistance: "10K",
                     tags: ["Garmin gang", "Coffee rides", "Early bird"],
@@ -88,7 +88,7 @@ enum MockData {
 
     static var seedMatches: [Match] {
         let noa = RunnerProfile(
-            id: UUID(), firstName: "Noa", age: 25,
+            id: UUID().uuidString, firstName: "Noa", age: 25,
             bio: "Parkrun every Saturday, rain or shine.",
             pacePerKm: "5:20 /km", weeklyKm: 30, favoriteDistance: "5K",
             tags: ["Parkrun", "Baker", "Plant parent"],
@@ -96,22 +96,22 @@ enum MockData {
             likesYou: true
         )
         let crossing = Crossing(
-            id: UUID(), profile: noa,
+            id: UUID().uuidString, profile: noa,
             routeName: "Old Town 5K", date: hoursAgo(120),
             overlapMinutes: 9, closestDistanceMeters: 2, theirPace: "5:20 /km"
         )
         return [
             Match(
-                id: UUID(),
+                id: UUID().uuidString,
                 crossing: crossing,
                 messages: [
-                    ChatMessage(id: UUID(), sender: .them,
+                    ChatMessage(id: UUID().uuidString, sender: .them,
                                 text: "So YOU'RE the one who out-kicked me at the finish 😄",
                                 date: hoursAgo(28)),
-                    ChatMessage(id: UUID(), sender: .me,
+                    ChatMessage(id: UUID().uuidString, sender: .me,
                                 text: "Guilty. In my defense, I heard footsteps and panicked.",
                                 date: hoursAgo(27)),
-                    ChatMessage(id: UUID(), sender: .them,
+                    ChatMessage(id: UUID().uuidString, sender: .them,
                                 text: "Rematch Saturday? Loser buys coffee.",
                                 date: hoursAgo(26))
                 ],

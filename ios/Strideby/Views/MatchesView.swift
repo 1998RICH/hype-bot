@@ -19,9 +19,10 @@ struct MatchesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.cloud)
             .navigationTitle("Matches")
-            .navigationDestination(for: UUID.self) { id in
+            .navigationDestination(for: String.self) { id in
                 ChatView(matchID: id)
             }
+            .refreshable { await app.refresh() }
         }
     }
 

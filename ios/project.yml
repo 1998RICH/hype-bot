@@ -16,6 +16,14 @@ targets:
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         UILaunchScreen: {}
+        NSHealthShareUsageDescription: >-
+          Strideby reads your running workouts and routes to find other
+          runners you crossed paths with. Your exact route is never shown
+          to anyone.
+    entitlements:
+      path: Strideby/Strideby.entitlements
+      properties:
+        com.apple.developer.healthkit: true
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1"

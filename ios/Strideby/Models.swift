@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct RunnerProfile: Identifiable {
-    let id: UUID
+    // String ids everywhere: mock data uses UUID strings, the backend uses
+    // numeric ids — both fit.
+    let id: String
     var firstName: String
     var age: Int
     var bio: String
@@ -20,7 +22,7 @@ struct RunnerProfile: Identifiable {
 /// In production these are computed on the backend by comparing GPS tracks
 /// of synced runs (same place, same time) — never via Bluetooth.
 struct Crossing: Identifiable {
-    let id: UUID
+    let id: String
     var profile: RunnerProfile
     var routeName: String
     var date: Date
@@ -32,14 +34,14 @@ struct Crossing: Identifiable {
 
 struct ChatMessage: Identifiable {
     enum Sender: Equatable { case me, them }
-    let id: UUID
+    let id: String
     var sender: Sender
     var text: String
     var date: Date
 }
 
 struct Match: Identifiable {
-    let id: UUID
+    let id: String
     var crossing: Crossing
     var messages: [ChatMessage]
     var matchedAt: Date

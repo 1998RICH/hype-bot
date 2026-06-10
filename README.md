@@ -24,7 +24,9 @@ This has three important consequences for the product:
 
 ## What's in this repo
 
-A fully working **SwiftUI prototype** with mock data — every screen of the core loop, in the Strava × Bumble design language you described (Strava orange `#FC5200` + Bumble yellow `#FFC629`):
+**1. A real backend** (`server/`) — accounts, run upload, GPS crossing detection, matching, and chat, with a full test suite. Deployable to a free Render instance in ~10 minutes; see [server/README.md](server/README.md).
+
+**2. The iOS app** (`ios/`) — every screen of the core loop, in the Strava × Bumble design language you described (Strava orange `#FC5200` + Bumble yellow `#FFC629`):
 
 | Screen | What it does |
 |---|---|
@@ -35,9 +37,7 @@ A fully working **SwiftUI prototype** with mock data — every screen of the cor
 | Chat | Messaging with run-context header and icebreaker suggestions |
 | Profile | Your stats, connected devices, and privacy controls (ghost mode, home-zone hiding) |
 
-Plus `ios/Strideby/Reference/CrossingDetector.swift` — a readable reference implementation of the GPS crossing-detection algorithm the backend will run.
-
-**What's mocked:** profiles, crossings, watch connections, and chat replies. There is no backend yet — that's the next milestone.
+**Two modes, one switch.** Out of the box the app runs in **demo mode** (mock data, no server — perfect for showing people). Deploy the backend, paste its URL into `ios/Strideby/AppConfig.swift`, and it becomes **live mode**: real accounts, Apple Watch run sync via HealthKit, real crossings computed by the server, real matches and chat. There's even an "Upload a test run" button in the Profile tab so two testers can cross each other without going for a run.
 
 ## Run it (no experience needed)
 
@@ -55,11 +55,16 @@ brew install xcodegen
 cd ios && xcodegen generate && open Strideby.xcodeproj
 ```
 
+> **Note for hand-made Xcode projects (Option A):** live mode needs the
+> **HealthKit** capability (Signing & Capabilities tab → + Capability) and a
+> **Privacy – Health Share Usage Description** entry in the Info tab. The
+> XcodeGen route (Option B) configures both automatically.
+
 ## Roadmap
 
-1. **v0 (this repo):** clickable prototype — use it to get feedback from runners and show investors/partners.
-2. **MVP:** real backend (accounts, photo profiles, crossing detection, matching, chat), HealthKit sync for Apple Watch users, TestFlight beta in one city.
-3. **v1:** Garmin Health API integration, push notifications ("You crossed 3 runners today"), safety/moderation tooling (required for App Store dating apps), women-message-first option (the Bumble playbook).
+1. **v0 — done:** clickable prototype + working backend with accounts, crossing detection, matching, and chat.
+2. **MVP — next:** deploy the backend, switch on live mode, TestFlight beta with real runners in one city. Add photo profiles + moderation.
+3. **v1:** Garmin sync (via Terra first, direct Garmin Health API once a legal entity exists), push notifications ("You crossed 3 runners today"), safety/moderation tooling (required for App Store dating apps), women-message-first option (the Bumble playbook).
 4. **Growth:** partner with run clubs and parkrun-style events — one event seeds hundreds of mutual crossings at once.
 
 The acquisition story (Strava or Match Group) gets credible at: one city with weekly active runners, a defensible crossing-graph dataset, and watch integrations they'd rather buy than build. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical plan, privacy/safety design, and App Store requirements.

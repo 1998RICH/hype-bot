@@ -17,6 +17,10 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: app.newMatch?.id)
+        .fullScreenCover(isPresented: $app.needsAuth) {
+            AuthView()
+                .interactiveDismissDisabled()
+        }
     }
 }
 

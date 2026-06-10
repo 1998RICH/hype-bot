@@ -109,9 +109,24 @@ struct CrossingsFeedView: View {
                 .font(.subheadline)
                 .foregroundStyle(Theme.slate)
                 .multilineTextAlignment(.center)
-            Button("Simulate a run sync") { app.syncDemoRun() }
+            if app.isLive {
+                Button(app.isSyncing ? "Syncing…" : "Sync Apple Watch runs") {
+                    Task { await app.syncFromHealthKit() }
+                }
                 .buttonStyle(.borderedProminent)
+                .disabled(app.isSyncing)
                 .padding(.top, 6)
+                if let status = app.syncStatus {
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(Theme.slate)
+                        .multilineTextAlignment(.center)
+                }
+            } else {
+                Button("Simulate a run sync") { app.syncDemoRun() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 6)
+            }
         }
         .padding(32)
     }

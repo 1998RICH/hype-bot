@@ -34,10 +34,10 @@ struct OnboardingView: View {
         if page < 3 {
             withAnimation { page += 1 }
         } else {
-            let trimmed = name.trimmingCharacters(in: .whitespaces)
-            if !trimmed.isEmpty { app.me.firstName = trimmed }
-            app.me.age = age
-            withAnimation { app.hasOnboarded = true }
+            withAnimation {
+                app.finishOnboarding(
+                    name: name.trimmingCharacters(in: .whitespaces), age: age)
+            }
         }
     }
 
@@ -120,13 +120,22 @@ struct OnboardingView: View {
                 .padding(.horizontal, 32)
             watchButton(name: "Apple Watch", icon: "applewatch",
                         connected: app.appleWatchConnected) {
-                app.appleWatchConnected.toggle()
+                if app.isLive {
+                    Task { @MainActor in
+                        try? await HealthKitManager.shared.requestAuthorization()
+                        app.appleWatchConnected = true
+                    }
+                } else {
+                    app.appleWatchConnected.toggle()
+                }
             }
             watchButton(name: "Garmin", icon: "antenna.radiowaves.left.and.right",
                         connected: app.garminConnected) {
                 app.garminConnected.toggle()
             }
-            Text("Prototype note: connections are simulated for now.")
+            Text(app.isLive
+                 ? "Apple Watch works today. Garmin sync is coming next (via Terra)."
+                 : "Prototype note: connections are simulated for now.")
                 .font(.caption)
                 .foregroundStyle(Theme.slate)
             Spacer()

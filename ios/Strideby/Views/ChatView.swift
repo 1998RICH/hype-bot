@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ChatView: View {
     @EnvironmentObject private var app: AppState
-    let matchID: UUID
+    let matchID: String
     @State private var draft = ""
 
     private var match: Match? {
@@ -20,6 +20,7 @@ struct ChatView: View {
         .background(Theme.cloud)
         .navigationTitle(match?.crossing.profile.firstName ?? "Chat")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await app.loadMessages(for: matchID) }
     }
 
     private func messageList(_ match: Match) -> some View {
