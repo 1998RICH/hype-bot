@@ -41,24 +41,12 @@ This has three important consequences for the product:
 
 ## Run it (no experience needed)
 
-You need a Mac with **Xcode** (free, from the Mac App Store).
+You need a Mac with **Xcode** (free, from the Mac App Store — version 16 or newer).
 
-**Option A — simplest:**
-1. Open Xcode → *Create New Project* → iOS → **App**. Name it `Strideby`, Interface: **SwiftUI**, Language: **Swift**.
-2. In the new project, delete the generated `ContentView.swift` and `StridebyApp.swift`.
-3. Drag everything inside `ios/Strideby/` from this repo into Xcode's file list (check *"Copy items if needed"* and add to the Strideby target).
-4. Press **▶** to launch the iPhone simulator.
+1. Double-click **`ios/Strideby.xcodeproj`** — the project opens in Xcode with all files already in place.
+2. Press **▶** to launch the iPhone simulator.
 
-**Option B — with [XcodeGen](https://github.com/yonaskolb/XcodeGen):**
-```bash
-brew install xcodegen
-cd ios && xcodegen generate && open Strideby.xcodeproj
-```
-
-> **Note for hand-made Xcode projects (Option A):** live mode needs the
-> **HealthKit** capability (Signing & Capabilities tab → + Capability) and a
-> **Privacy – Health Share Usage Description** entry in the Info tab. The
-> XcodeGen route (Option B) configures both automatically.
+That's it. The HealthKit capability and privacy text are pre-configured; for running on a real iPhone you only need to pick your (free) Apple ID team under *Signing & Capabilities*.
 
 ## Roadmap
 
