@@ -39,9 +39,8 @@ Reference implementation: [`ios/Strideby/Reference/CrossingDetector.swift`](../i
 2. **Candidate pairs:** index track points by `(geohash cell, 5-minute time bucket)`. Two runs sharing any bucket are candidates — this avoids comparing every run to every other run.
 3. **Verify:** for each candidate pair, walk both tracks in time order; count seconds where the runners were within **25 m** at the same moment (haversine distance, ±5 s tolerance).
 4. **Classify:**
-   - ≥ 60 s within radius → a **crossing** (shows in the feed)
-   - ≥ 5 min → "ran side by side" badge (stronger signal, shown on the card)
-   - Discard blips < 60 s (passing cars, GPS noise — this fixes exactly the false "ran with" you saw on Strava).
+   - ≥ 5 s within radius → a **crossing** (shows in the feed). This counts a genuine face-to-face pass (~8 s within 25 m at running speeds) while discarding single-sample GPS blips.
+   - ≥ 5 min → "ran side by side" badge (stronger signal, shown on the card). The card always shows the overlap duration, so a long shared stretch reads differently from a brief pass.
 5. **Fan out:** create a `Crossing` row for both users, send a push notification ("You crossed 2 runners on today's run 👀").
 
 Postgres + PostGIS handles all of this comfortably to ~100k users; no exotic infrastructure needed.

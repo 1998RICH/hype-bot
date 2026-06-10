@@ -2,15 +2,16 @@
 
 Two runners "crossed" when their GPS tracks were within RADIUS_M of each
 other at (approximately) the same moment for at least MIN_OVERLAP_S seconds.
-The minimum-overlap rule is what prevents false positives like a brief
-drive-by or a single GPS blip.
+At 5 s this counts a genuine face-to-face pass (two runners passing in
+opposite directions stay within 25 m for ~8 s) while still filtering
+single-sample GPS blips.
 """
 import math
 from dataclasses import dataclass
 
 RADIUS_M = 25.0
 TIME_TOL_S = 5.0
-MIN_OVERLAP_S = 60.0
+MIN_OVERLAP_S = 5.0
 # Samples this close to a run's start/end point are discarded for users with
 # hide_home_zone enabled, so crossings never reveal where someone lives.
 HOME_ZONE_M = 400.0
@@ -59,16 +60,33 @@ def trim_home_zone(samples: list[Sample], radius_m: float = HOME_ZONE_M) -> list
 def overlap_stats(a: list[Sample], b: list[Sample],
                   radius_m: float = RADIUS_M,
                   time_tol_s: float = TIME_TOL_S) -> OverlapStats:
-    """Walk both time-sorted tracks; count seconds spent within radius.
+    """Symmetric overlap between two tracks.
 
-    Assumes ~1 Hz sampling, which is what sport watches record.
+    Measured in both directions and the smaller value wins: a genuine pass
+    is symmetric, while a single stray GPS point in one track can match
+    many samples of the other within the time tolerance and inflate the
+    one-directional count.
+    """
+    forward = _directed_stats(a, b, radius_m, time_tol_s)
+    backward = _directed_stats(b, a, radius_m, time_tol_s)
+    return OverlapStats(
+        overlap_seconds=min(forward.overlap_seconds, backward.overlap_seconds),
+        closest_meters=min(forward.closest_meters, backward.closest_meters),
+        occurred_at_epoch=forward.occurred_at_epoch,
+    )
+
+
+def _directed_stats(a: list[Sample], b: list[Sample],
+                    radius_m: float, time_tol_s: float) -> OverlapStats:
+    """Walk track `a`; count seconds where the time-nearest sample of `b`
+    is within radius. Assumes ~1 Hz sampling, which sport watches record.
     """
     if not a or not b:
         return OverlapStats(0.0, math.inf, 0.0)
 
     overlap = 0.0
     closest = math.inf
-    occurred_at = a[0][2]
+    occurred_at = a[0][2] if a else 0.0
     j = 0
     for lat, lon, t in a:
         while j + 1 < len(b) and abs(b[j + 1][2] - t) < abs(b[j][2] - t):

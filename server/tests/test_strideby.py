@@ -54,12 +54,19 @@ def test_parallel_streets_50m_apart_never_overlap():
     assert 40 < stats.closest_meters < 60
 
 
-def test_brief_opposite_direction_pass_is_below_threshold():
-    # Closing speed 6 m/s within a 25 m radius ≈ 8 s together — a real
-    # crossing of paths, but too brief to surface as "ran together".
+def test_brief_opposite_direction_pass_counts_as_crossing():
+    # Closing speed 6 m/s within a 25 m radius ≈ 8 s together — a genuine
+    # face-to-face pass, which is exactly what the app is about.
     stats = detection.overlap_stats(northbound(), southbound())
-    assert 0 < stats.overlap_seconds < detection.MIN_OVERLAP_S
+    assert detection.MIN_OVERLAP_S <= stats.overlap_seconds < 15
     assert stats.closest_meters < 5
+
+
+def test_single_blip_is_below_threshold():
+    # One isolated second within radius (a GPS glitch) must not count.
+    blip = [northbound()[300]]
+    stats = detection.overlap_stats(northbound(), blip)
+    assert stats.overlap_seconds < detection.MIN_OVERLAP_S
 
 
 def test_home_zone_trim_removes_route_endpoints():
@@ -161,15 +168,15 @@ def test_full_flow_upload_cross_match_chat(client):
     assert client.get("/crossings", headers=auth(alice)).json() == []
 
 
-def test_brief_pass_creates_no_crossing(client):
+def test_brief_pass_creates_a_crossing(client):
     register_token = register(client, "a@example.com", "A")
     passerby = register(client, "b@example.com", "B")
 
     client.post("/runs", json=run_body(northbound()), headers=auth(register_token))
     response = client.post("/runs", json=run_body(southbound()),
                            headers=auth(passerby))
-    # They genuinely crossed, but only for ~8 seconds — below threshold.
-    assert response.json()["new_crossings"] == 0
+    # ~8 seconds face to face in opposite directions — that's a crossing.
+    assert response.json()["new_crossings"] == 1
 
 
 def test_ghost_mode_blocks_crossings(client):

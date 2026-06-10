@@ -43,10 +43,12 @@ enum CrossingDetector {
     }
 
     /// A "crossing" worth surfacing: at least `minOverlapSeconds` of shared
-    /// path, so a single drive-by GPS blip doesn't count.
+    /// path. 5 s counts a genuine face-to-face pass (~8 s within 25 m at
+    /// running speeds). Measured in both directions and the smaller value
+    /// wins — a real pass is symmetric, a single stray GPS point isn't.
     static func isCrossing(_ a: [GPSSample], _ b: [GPSSample],
-                           minOverlapSeconds: TimeInterval = 60) -> Bool {
-        overlapSeconds(a, b) >= minOverlapSeconds
+                           minOverlapSeconds: TimeInterval = 5) -> Bool {
+        min(overlapSeconds(a, b), overlapSeconds(b, a)) >= minOverlapSeconds
     }
 
     /// Haversine distance between two GPS samples, in meters.

@@ -66,8 +66,11 @@ Rebuild the app — it now uses real accounts and real crossings.
 
 On every run upload, the server prefilters candidate runs by time window and
 bounding box, then walks both GPS tracks counting seconds the runners were
-within 25 m of each other at the same moment. At least 60 s of shared path
-is required — a brief pass (like Strava's false "ran with" groupings) does
-not count. Users with **hide home zone** enabled have the first/last 400 m
+within 25 m of each other at the same moment. At least 5 s of shared path is
+required — enough to count a genuine face-to-face pass (~8 s within radius
+at running speeds) while filtering single-sample GPS blips. The app still
+shows *how long* you were side by side, so a 10-minute shared stretch reads
+very differently from a 8-second pass. Users with **hide home zone** enabled
+have the first/last 400 m
 of every run discarded before comparison, and **ghost mode** users neither
 create nor receive crossings. See `app/detection.py`.
