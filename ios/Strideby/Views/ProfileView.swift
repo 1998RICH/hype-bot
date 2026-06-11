@@ -97,7 +97,7 @@ struct ProfileView: View {
             return LinearGradient(colors: [Theme.orange, Theme.violet],
                                   startPoint: .topLeading, endPoint: .bottomTrailing)
         case .voltMinimal:
-            return LinearGradient(colors: [Theme.voltYellow, Theme.voltYellow],
+            return LinearGradient(colors: [Theme.specLime, Theme.specLime],
                                   startPoint: .top, endPoint: .bottom)
         case .sunsetClub:
             return LinearGradient(colors: [Theme.amber, Theme.orange],

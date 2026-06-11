@@ -40,7 +40,7 @@ final class AppState: ObservableObject {
     @Published var requestedTab: MainTab?
 
     /// Active design direction (Profile → Design lab).
-    @Published var design: DesignVariant = .neonNight {
+    @Published var design: DesignVariant = .voltMinimal {
         didSet {
             Theme.variant = design
             UserDefaults.standard.set(design.rawValue, forKey: Self.designKey)

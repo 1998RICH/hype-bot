@@ -25,12 +25,13 @@ struct RootView: View {
 }
 
 enum MainTab {
-    case crossings, run, matches, profile
+    case crossings, run, challenges, matches, profile
 
     var icon: String {
         switch self {
-        case .crossings: return "arrow.triangle.swap"
+        case .crossings: return "house.fill"
         case .run: return "figure.run"
+        case .challenges: return "trophy.fill"
         case .matches: return "message.fill"
         case .profile: return "person.fill"
         }
@@ -38,8 +39,9 @@ enum MainTab {
 
     var title: String {
         switch self {
-        case .crossings: return "Crossed"
+        case .crossings: return "Home"
         case .run: return "Run"
+        case .challenges: return "Challenges"
         case .matches: return "Matches"
         case .profile: return "Profile"
         }
@@ -52,7 +54,7 @@ struct MainTabView: View {
     @EnvironmentObject private var app: AppState
     @State private var tab: MainTab = .crossings
 
-    private let barTabs: [MainTab] = [.crossings, .matches, .profile]
+    private let barTabs: [MainTab] = [.crossings, .challenges, .matches, .profile]
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -79,6 +81,7 @@ struct MainTabView: View {
         switch tab {
         case .crossings: CrossingsFeedView()
         case .run: RunTabView()
+        case .challenges: ChallengesView()
         case .matches: MatchesView()
         case .profile: ProfileView()
         }

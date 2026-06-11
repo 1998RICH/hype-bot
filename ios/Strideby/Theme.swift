@@ -35,7 +35,7 @@ enum DesignVariant: String, CaseIterable, Identifiable {
     var blurb: String {
         switch self {
         case .neonNight: return "Glowing gradients & violet haze"
-        case .voltMinimal: return "Clean black & electric yellow"
+        case .voltMinimal: return "Pure black & volt lime — the spec"
         case .sunsetClub: return "Bold blocks & burnt amber"
         }
     }
@@ -56,7 +56,7 @@ enum Theme {
     static var bg: Color {
         switch variant {
         case .neonNight: return Color(hex: 0x141021)
-        case .voltMinimal: return Color(hex: 0x0D0D10)
+        case .voltMinimal: return Color(hex: 0x050505)
         case .sunsetClub: return Color(hex: 0x0A0A0A)
         }
     }
@@ -64,7 +64,7 @@ enum Theme {
     static var card: Color {
         switch variant {
         case .neonNight: return Color(hex: 0x211A35)
-        case .voltMinimal: return Color(hex: 0x1A1A20)
+        case .voltMinimal: return Color(hex: 0x262626)
         case .sunsetClub: return Color(hex: 0x171614)
         }
     }
@@ -72,24 +72,30 @@ enum Theme {
     static var cardElevated: Color {
         switch variant {
         case .neonNight: return Color(hex: 0x2D2349)
-        case .voltMinimal: return Color(hex: 0x24242C)
+        case .voltMinimal: return Color(hex: 0x2F2F2F)
         case .sunsetClub: return Color(hex: 0x21201D)
         }
     }
 
     static var cardBorder: Color {
-        Color.white.opacity(variant == .neonNight ? 0.10 : 0.07)
+        switch variant {
+        case .neonNight: return Color.white.opacity(0.10)
+        case .voltMinimal: return Color.white.opacity(0.04)  // spec: no visible borders
+        case .sunsetClub: return Color.white.opacity(0.07)
+        }
     }
 
     // MARK: Accent system
 
     /// Volt lime — the loud CTA color of the reference model.
     static let lime = Color(hex: 0xC8F549)
+    /// Spec accent for the Volt Minimal direction.
+    static let specLime = Color(hex: 0xB7FF4A)
 
     static var accent: Color {
         switch variant {
         case .neonNight: return lime
-        case .voltMinimal: return voltYellow
+        case .voltMinimal: return specLime
         case .sunsetClub: return amber
         }
     }
@@ -97,7 +103,7 @@ enum Theme {
     static var onAccent: Color {
         switch variant {
         case .neonNight: return Color(hex: 0x1B2404)
-        case .voltMinimal: return Color(hex: 0x201602)
+        case .voltMinimal: return Color(hex: 0x0A0A0A)
         case .sunsetClub: return Color(hex: 0x211200)
         }
     }
@@ -139,10 +145,13 @@ enum Theme {
     static var slate: Color {
         switch variant {
         case .neonNight: return Color(hex: 0xB7AECE)
-        case .voltMinimal: return Color(hex: 0xA3A3AE)
+        case .voltMinimal: return Color(hex: 0xBDBDBD)
         case .sunsetClub: return Color(hex: 0xA9A29A)
         }
     }
+
+    /// Tertiary text (spec: #8A8A8A).
+    static let muted = Color(hex: 0x8A8A8A)
 
     // MARK: Aliases & shared styles
 
